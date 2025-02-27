@@ -48,7 +48,7 @@ class NSFWDetection:
 
     def run(self, image, score, alternative_image=None):
         if alternative_image is None:
-            default_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "banned-detect-image.png")
+            default_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "banned-detect-image.jpg")
             alternative_image = pil2tensor(Image.open(default_path))
         transform = T.ToPILImage()
         classifier = pipeline("image-classification", model="Falconsai/nsfw_image_detection")
