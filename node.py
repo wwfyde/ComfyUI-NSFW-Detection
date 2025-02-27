@@ -44,3 +44,35 @@ class NSFWDetection:
 
     FUNCTION = "run"
 
+    CATEGORY = "NSFWDetection"
+
+    def run(self, image, score, alternative_image=None):
+        if alternative_image is None:
+            default_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "banned-detect-image.png")
+            alternative_image = pil2tensor(Image.open(default_path))
+        transform = T.ToPILImage()
+        classifier = pipeline("image-classification", model="Falconsai/nsfw_image_detection")
+        for i in range(len(image)):
+            result = classifier(transform(image[i].permute(2, 0, 1)))
+            image_size = image[i].size()
+            width, height = image_size[1], image_size[0]
+            for r in result:
+                if r["label"] == "nsfw":
+                    if r["score"] > score:
+                        image[i] = pil2tensor(transform(alternative_image[0].permute(2, 0, 1)).resize((width, height),
+                                                                               resample=Image.Resampling(2)))
+
+        return (image,)
+
+
+# A dictionary that contains all nodes you want to export with their names
+# NOTE: names should be globally unique
+NODE_CLASS_MAPPINGS = {
+    "NSFWDetection": NSFWDetection
+}
+
+# A dictionary that contains the friendly/humanly readable titles for the nodes
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "NSFWDetection": "NSFW Detection"
+}
+
